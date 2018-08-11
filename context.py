@@ -14,6 +14,11 @@ class LabeledContext(ttk.LabelFrame):
         self.root = root
 
 
+class PopOutContext(tk.Toplevel):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
 class PageContext(Context):
     def __init__(self, root, **kwargs):
         super().__init__(root, **kwargs)
@@ -35,18 +40,24 @@ class PageContext(Context):
 
 
 class TerminalContext(LabeledContext):
-    def __init__(self, root, pos, resize_func_name, resize_func, **kwargs):
+    def __init__(self, root, pos, resize_func_name, resize_func, pop_out_func_name, pop_out_func, **kwargs):
         super().__init__(root, **kwargs)
         self.root = root
         self.pos = pos
         self.resize_func_name = resize_func_name
         self.resize_func = resize_func
+        self.pop_out_func_name = pop_out_func_name
+        self.pop_out_func = pop_out_func
 
         self.start_callback = None
         self.restart_callback = None
         self.stop_callback = None
 
         self.is_started = False
+
+        self.expand_image = tk.PhotoImage(file="res/expand_16.png")
+        self.shrink_image = tk.PhotoImage(file="res/shrink_16.png")
+        self.eject_image = tk.PhotoImage(file="res/eject_16.png")
 
         self._setup_terminal()
 
@@ -58,17 +69,23 @@ class TerminalContext(LabeledContext):
         self.text_box = tk.Text(self, borderwidth=3, relief=tk.SUNKEN, undo=True, wrap='word', state=tk.DISABLED)
         self.scroll_bar = ttk.Scrollbar(self, command=self.text_box.yview)
         self.text_box['yscrollcommand'] = self.scroll_bar.set
-        self.expand = ttk.Button(self.text_box, text=self.resize_func_name, command=self.resize_func)
+
+        if self.resize_func_name and self.resize_func:
+            self.expand = ttk.Button(self.text_box, text=self.resize_func_name, command=self.resize_func)
+
+        if self.pop_out_func_name and self.pop_out_func:
+            self.eject = ttk.Button(self.text_box, text=self.pop_out_func_name, command=self.pop_out_func)
 
         self.configure_terminal()
 
     def configure_terminal(self):
-
         if self.pos:  # Put in grid
             row, col = self.pos
             self.grid(row=row, column=col, sticky="nsew")
+            resize_image = self.expand_image
         else:  # Put in solo-view
             self.pack(side="top", fill="both", expand=True)
+            resize_image = self.shrink_image
 
         self.grid_rowconfigure(0, weight=0)
         self.grid_rowconfigure(1, weight=1)
@@ -100,7 +117,19 @@ class TerminalContext(LabeledContext):
         self.scroll_bar.grid(row=1, rowspan=1, column=2, sticky="nsew")
 
         # Expand Button
-        self.expand.place(relx=1.0, rely=1.0, x=-padx, y=-pady, anchor="se")
+
+        if self.resize_func_name and self.resize_func:
+            self.expand.config(image=resize_image)
+            self.expand.place(relx=1.0, rely=1.0, x=-padx, y=-pady, anchor="se")
+            self.expand.update()
+            width = self.expand.winfo_width() + padx
+        else:
+            width = padx
+
+        # Eject Button
+        if self.pop_out_func_name and self.pop_out_func:
+            self.eject.config(image=self.eject_image)
+            self.eject.place(relx=1.0, rely=1.0, x=-(width + padx), y=-pady, anchor="se")
 
     def set_start_callback(self, start_callback):
         self.start_callback = start_callback

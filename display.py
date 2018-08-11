@@ -36,6 +36,15 @@ class Display(ThemedTk):
         self.minsize(self.winfo_width(), self.winfo_height())
 
         self.protocol("WM_DELETE_WINDOW", self.stop)
+        self.center()
+
+    def center(self):
+        self.update_idletasks()
+        width = self.winfo_width()
+        height = self.winfo_height()
+        x = (self.winfo_screenwidth() // 2) - (width // 2)
+        y = (self.winfo_screenheight() // 2) - (height // 2)
+        self.geometry('{}x{}+{}+{}'.format(width, height, x, y))
 
     def update(self):
         super().update()

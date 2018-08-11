@@ -2,7 +2,7 @@ import math
 from queue import Queue
 
 import log
-from context import PageContext
+from context import PageContext, PopOutContext
 from terminal import Terminal
 from util import Dict
 
@@ -15,6 +15,7 @@ class TerminalManager(object):
         self.expanded_term = None
         self.current_context = None
         self.contexts = Dict()
+        self.pop_out_contexts = Dict()
         self.queue = Queue()
 
     def setup(self):
@@ -73,6 +74,30 @@ class TerminalManager(object):
         self.current_context.hide()
         self.current_context = self.contexts["main"]
         self.current_context.show()
+
+    def eject_terminal(self, terminal):
+        self.pop_out_contexts[terminal.index] = PopOutContext()
+        terminal.add_context("popout", self.pop_out_contexts[terminal.index])
+        # self.pop_out_contexts[terminal.index].protocol("WM_DELETE_WINDOW", self.on_popout_close)
+        self.pop_out_contexts[terminal.index].bind("<Destroy>", self.on_popout_close)
+        self.pop_out_contexts[terminal.index].title(str(terminal.index))
+        self._center(self.pop_out_contexts[terminal.index])
+        var = self.pop_out_contexts[terminal.index]
+        var.__dict__["terminal_index"] = terminal.index
+
+    def _center(self, win):
+        win.update_idletasks()
+        width = win.winfo_width()
+        height = win.winfo_height()
+        x = (win.winfo_screenwidth() // 2) - (width // 2)
+        y = (win.winfo_screenheight() // 2) - (height // 2)
+        win.geometry('{}x{}+{}+{}'.format(width, height, x, y))
+
+    def on_popout_close(self, event):
+        if "terminal_index" in event.widget.__dict__:
+            terminal = self.terminals[event.widget.__dict__["terminal_index"]]
+            terminal.remove_context("popout")
+
 
     def set_terminal_attribute(self, name, attrib, value):
         self.queue.put(("set_terminal_attribute", (name, attrib, value)))
