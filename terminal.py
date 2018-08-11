@@ -1,4 +1,4 @@
-from context import TerminalContext
+from rendering.tkinter.context import TerminalContext
 from util import Dict
 
 

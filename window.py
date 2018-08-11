@@ -1,6 +1,7 @@
-from display import Display
+from rendering.tkinter.context import RootContext
 from pthread import PThread
 from terminal_manager import TerminalManager
+import time
 
 
 class Window(object):
@@ -9,7 +10,7 @@ class Window(object):
         self.title = title
         self.dim = dim
         self.theme = theme
-        self.display = None
+        self.root_context = None
         self.terminal_manager = TerminalManager(self)
 
         self.is_running = True
@@ -17,8 +18,8 @@ class Window(object):
         self._setup()
 
     def _setup(self):
-        self.display = Display(self, self.title, self.dim, self.theme)
-        self.display.setup()
+        self.root_context = RootContext(self, self.title, self.dim, self.theme)
+        self.root_context.setup()
         self.terminal_manager.setup()
 
     def start(self, run_callback, run_callback_args):
@@ -33,11 +34,12 @@ class Window(object):
 
     def _run(self):
         while self.is_running:
-            self.display.update()
+            self.root_context.update()
             self.terminal_manager.update()
+            time.sleep(1/60)
 
     def get_terminal_manger(self):
         return self.terminal_manager
 
     def get_root_context(self):
-        return self.display
+        return self.root_context

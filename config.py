@@ -13,7 +13,7 @@ def load_config():
         with open("config.json") as i:
             data = loads(i.read())
 
-            for key in CONFIG.keys():
+            for key in data.keys():
                 CONFIG[key] = data.get(key)
 
     except FileNotFoundError as e:

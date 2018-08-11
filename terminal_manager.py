@@ -2,7 +2,7 @@ import math
 from queue import Queue
 
 import log
-from context import PageContext, PopOutContext
+from rendering.tkinter.context import PageContext, PopOutContext
 from terminal import Terminal
 from util import Dict
 

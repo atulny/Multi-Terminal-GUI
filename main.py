@@ -33,13 +33,11 @@ def _run(wn):
     terminal_manager.set_terminal_attribute("Terminal: 0", "restart_callback", _restart)
     terminal_manager.set_terminal_attribute("Terminal: 0", "stop_callback", _stop)
 
-    terminal = terminal_manager.get_terminal("Terminal: 0")
-
     while True:
         i = random.randint(0, 7)
         terminal_manager.append_to_terminal("Terminal: %d" % i, "test" + str(i))
         terminal_manager.set_terminal_attribute("Terminal: %d" % i, "status", random.randint(0, 3))
-        time.sleep(1/20)
+        time.sleep(1/100)
 
 
 if __name__ == '__main__':
